@@ -1,0 +1,24 @@
+# Variables de entorno reales
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Entorno virtual
+venv/
+.venv/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Backups de base de datos
+*.sql.gz
+*.dump
