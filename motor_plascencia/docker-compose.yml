@@ -1,37 +1,44 @@
 version: "3.9"
 
 services:
-  # Servicio de base de datos PostgreSQL
-  db:
+  postgres_db:
     image: postgres:15
     container_name: motor_plascencia_db
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: atoms_db
+      POSTGRES_USER: maestro_aluminero
+      POSTGRES_PASSWORD: password_seguro123
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "${DB_PORT}:5432"
+      - "5432:5432"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  # Servicio de la aplicación Streamlit
-  app:
+  app_taller:
     build: .
-    container_name: motor_plascencia_app
+    container_name: taller_app
+    volumes:
+      - .:/app
     ports:
       - "8501:8501"
+    environment:
+      - PYTHONPATH=/app
+    command: streamlit run app_taller/produccion.py
     depends_on:
-      db:
-        condition: service_healthy
-    env_file:
-      - .env
-    restart: unless-stopped
+      - postgres_db
+
+  app_oficina:
+    build: .
+    container_name: oficina_app
+    volumes:
+      - .:/app
+    ports:
+      - "8502:8502"
+    environment:
+      - PYTHONPATH=/app
+    command: streamlit run app_oficina/alimentador.py
+    depends_on:
+      - postgres_db
 
 volumes:
   pgdata:

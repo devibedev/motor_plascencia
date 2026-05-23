@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  postgres_db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: atoms_db
+      POSTGRES_USER: maestro_aluminero
+      POSTGRES_PASSWORD: password_seguro123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  app_taller:
+    build: .
+    container_name: app_taller
+    command: streamlit run app_taller/produccion.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONPATH=/app
+      - DB_HOST=postgres_db
+      - DB_NAME=atoms_db
+      - DB_USER=maestro_aluminero
+      - DB_PASSWORD=password_seguro123
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres_db
+
+  app_oficina:
+    build: .
+    container_name: app_oficina
+    command: streamlit run app_oficina/alimentador.py --server.port=8502 --server.address=0.0.0.0
+    ports:
+      - "8502:8502"
+    environment:
+      - PYTHONPATH=/app
+      - DB_HOST=postgres_db
+      - DB_NAME=atoms_db
+      - DB_USER=maestro_aluminero
+      - DB_PASSWORD=password_seguro123
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres_db
+
+volumes:
+  postgres_data:
